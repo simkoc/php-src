@@ -831,7 +831,8 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 			zval *zv;
 			ZEND_HASH_FOREACH_KEY_VAL(jumptable, num_key, key, zv) {
 				if (key) {
-					fprintf(stderr, " \"%s\":", ZSTR_VAL(key));
+                    char* ht_key = ZSTR_VAL(key);
+					fprintf(stderr, " \"%s\":", b64_encode(ht_key, strlen(ht_key)));
 				} else {
 					fprintf(stderr, " " ZEND_LONG_FMT ":", num_key);
 				}
