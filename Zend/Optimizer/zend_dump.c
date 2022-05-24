@@ -254,9 +254,26 @@ void zend_dump_const(const zval *zv)
 		  fprintf(stderr, " string(\"%s\")", b64_encode(str,strlen(str)));
 		  //fprintf(stderr, " string(\"%s\")", Z_STRVAL_P(zv));
 			break;
-		case IS_ARRAY:
-			fprintf(stderr, " array(...)");
-			break;
+		case IS_ARRAY: {
+            zend_ulong index;
+            zend_string *key;
+            const zval *data;
+            // TODO base64
+            // TODO structured output
+            ZEND_HASH_FOREACH_KEY_VAL(zv->value.arr, index, key, data)
+                    {
+                        if (key) {
+                            fprintf(stderr, "Name: %s",
+                                             ZSTR_VAL(key));
+                        } else {
+                            fprintf(stderr, "Position #" ZEND_ULONG_FMT ":", key);
+                        }
+                        zend_dump_const(data);
+                        fprintf(stderr, "\n");
+
+                    } ZEND_HASH_FOREACH_END();
+                    break;
+                }
 		default:
 			fprintf(stderr, " zval(type=%d)", Z_TYPE_P(zv));
 			break;
