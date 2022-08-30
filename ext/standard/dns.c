@@ -50,6 +50,7 @@
 #if HAVE_RESOLV_H
 #include <resolv.h>
 #endif
+//#include <libc.h>
 #ifdef HAVE_DNS_H
 #include <dns.h>
 #endif
