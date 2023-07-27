@@ -231,7 +231,16 @@ void zend_dump_ht(HashTable *ht)
 	} ZEND_HASH_FOREACH_END();
 }
 
-void zend_dump_const(const zval *zv)
+void zend_dump_const(const zval *zv) {
+    zend_dump_const_real(zv, 0); // default to no changes w.r.t to arrays
+}
+
+/**
+ *
+ * @param zv
+ * @param expand_array set to != 0 if arrays should be expanded.
+ */
+void zend_dump_const_real(const zval *zv, int expand_array)
 {
 	switch (Z_TYPE_P(zv)) {
 		case IS_NULL:
@@ -254,9 +263,32 @@ void zend_dump_const(const zval *zv)
 		  fprintf(stderr, " string(\"%s\")", b64_encode(str,strlen(str)));
 		  //fprintf(stderr, " string(\"%s\")", Z_STRVAL_P(zv));
 			break;
-		case IS_ARRAY:
-			fprintf(stderr, " array(...)");
-			break;
+        // TODO: how to represent this in the cpg?
+        // fake bytecode call?
+        case IS_ARRAY: {
+            if(!expand_array) {
+                fprintf(stderr, " array(...)");
+                break;
+            }
+            zend_ulong index;
+            zend_string *key;
+            const zval *data;
+            fprintf(stderr, " array(");
+            ZEND_HASH_FOREACH_KEY_VAL(zv->value.arr, index, key, data)
+                    {
+                        if (key) {
+                            char* keyvalue = ZSTR_VAL(key);
+                            fprintf(stderr, "N:string(\"%s\")",
+                                    b64_encode(keyvalue, strlen(keyvalue)));
+                        } else {
+                            fprintf(stderr, "P:int(" ZEND_LONG_FMT ")", index);
+                        }
+                        zend_dump_const_real(data, 0); // Todo[Malte]: I don't want to deal with nested arrays just now.
+                        fprintf(stderr, "|");
+                    } ZEND_HASH_FOREACH_END();
+                fprintf(stderr, ")");
+            break;
+        }
 		default:
 			fprintf(stderr, " zval(type=%d)", Z_TYPE_P(zv));
 			break;
@@ -844,7 +876,7 @@ ZEND_API void zend_dump_op(const zend_op_array *op_array, const zend_basic_block
 			} ZEND_HASH_FOREACH_END();
 			fprintf(stderr, " default:");
 		} else {
-			zend_dump_const(op);
+			zend_dump_const_real(op, 1);
 		}
 	} else if (opline->op2_type & (IS_CV|IS_VAR|IS_TMP_VAR)) {
 		if (ssa_op) {

@@ -43,6 +43,7 @@ ZEND_API void zend_dump_ssa_var(const zend_op_array *op_array, const zend_ssa *s
 ZEND_API void zend_dump_var(const zend_op_array *op_array, zend_uchar var_type, int var_num);
 void zend_dump_op_array_name(const zend_op_array *op_array);
 void zend_dump_const(const zval *zv);
+void zend_dump_const_real(const zval *zv, int expand_array);
 void zend_dump_ht(HashTable *ht);
 
 END_EXTERN_C()
