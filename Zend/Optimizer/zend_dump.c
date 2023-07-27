@@ -273,21 +273,20 @@ void zend_dump_const_real(const zval *zv, int expand_array)
             zend_ulong index;
             zend_string *key;
             const zval *data;
-            // TODO base64
-            // TODO structured output
+            fprintf(stderr, " array(");
             ZEND_HASH_FOREACH_KEY_VAL(zv->value.arr, index, key, data)
                     {
-                        fprintf(stderr, " ");
                         if (key) {
                             char* keyvalue = ZSTR_VAL(key);
-                            fprintf(stderr, "N:%s",
+                            fprintf(stderr, "N:string(\"%s\")",
                                     b64_encode(keyvalue, strlen(keyvalue)));
                         } else {
-                            fprintf(stderr, "P" ZEND_ULONG_FMT ":", key);
+                            fprintf(stderr, "P:int(" ZEND_LONG_FMT ")", index);
                         }
                         zend_dump_const_real(data, 0); // Todo[Malte]: I don't want to deal with nested arrays just now.
                         fprintf(stderr, "|");
                     } ZEND_HASH_FOREACH_END();
+                fprintf(stderr, ")");
             break;
         }
 		default:
